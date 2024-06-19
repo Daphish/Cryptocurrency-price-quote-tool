@@ -1,6 +1,7 @@
 const criptomonedasSelect = document.querySelector('#criptomonedas');
 const monedaSelect = document.querySelector('#moneda');
 const formulario = document.querySelector('#formulario');
+const resultado = document.querySelector('#resultado');
 
 const objBusqueda = {
     moneda: '',
@@ -46,7 +47,6 @@ function selectCriptomonedas(criptomonedas){
 
 function leerValor(e){
     objBusqueda[e.target.name] = e.target.value;
-    console.log(objBusqueda);
 }
 
 function submitFormulario(e){
@@ -60,7 +60,7 @@ function submitFormulario(e){
     }
 
     //Consultar la API con los resultados
-    //consultarAPI();
+    consultarAPI();
 }
 
 function mostrarAlerta(msg){
@@ -81,4 +81,50 @@ function mostrarAlerta(msg){
         }, 3000);
     }
     
+}
+
+function consultarAPI(){
+    const { moneda, criptomoneda } = objBusqueda;
+
+    const url = `https://min-api.cryptocompare.com/data/pricemultifull?fsyms=${criptomoneda}&tsyms=${moneda}`;
+
+    fetch(url)
+        .then( respuesta => respuesta.json() )
+        .then( cotizacion => {
+            mostrarCotizacionHTML(cotizacion.DISPLAY[criptomoneda][moneda]);
+        }) 
+}
+
+function mostrarCotizacionHTML(cotizacion){
+    limpiarHTML();
+    
+    const { PRICE, HIGHDAY, LOWDAY, CHANGEPCT24HOUR, LASTUPDATE } = cotizacion;
+
+    const precio = document.createElement('p');
+    precio.classList.add('precio');
+    precio.innerHTML = `El precio es <span>${PRICE}</span>`;
+
+    const precioAlto = document.createElement('p');
+    precioAlto.innerHTML = `<p>Precio más alto del día <span>${HIGHDAY}</span>`;
+
+    const precioBajo = document.createElement('p');
+    precioBajo.innerHTML = `<p>Precio más bajo del día <span>${LOWDAY}</span>`;
+
+    const ultimasHoras = document.createElement('p');
+    ultimasHoras.innerHTML = `<p>Variación últimas 24 horas <span>${CHANGEPCT24HOUR}</span>`;
+
+    const ultimaActualizacion = document.createElement('p');
+    ultimaActualizacion.innerHTML = `<p>Última actualización <span>${LASTUPDATE}</span>`;
+
+    resultado.appendChild(precio);
+    resultado.appendChild(precioAlto);
+    resultado.appendChild(precioBajo);
+    resultado.appendChild(ultimasHoras);
+    resultado.appendChild(ultimaActualizacion);
+}
+
+function limpiarHTML(){
+    while(resultado.firstChild){
+        resultado.removeChild(resultado.firstChild);
+    }
 }
